@@ -112,7 +112,7 @@ async def completions():
          yield to_openai_data(str(e),True)
          return
 
-      yield '\n\n'
+      yield to_openai_data('\n\n')
       if len(search_result) > 0:
         index = 1
         for item in search_result:
