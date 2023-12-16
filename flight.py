@@ -77,14 +77,17 @@ async def completions():
       
       metadata = extract_metadata(data)
       print(metadata)
+      search = metadata['search']
 
       try:
          async for final,response in bot.ask_stream (
             prompt=metadata['prompt'],
             conversation_style=metadata['style'],
-            search_result=metadata['search'],
+            search_result=search,
             raw=True,
-            webpage_context=metadata['context']
+            webpage_context=metadata['context'],
+            no_search=(not search),
+            mode=metadata['mode'],
           ):
 
           type = response["type"]
@@ -105,6 +108,7 @@ async def completions():
               if "suggestedResponses" in message:
                 suggestions = list(map(lambda x: x["text"], message["suggestedResponses"]))
       except Exception as e:
+         print(e)
          yield to_openai_data(str(e),True)
          return
 

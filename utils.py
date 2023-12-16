@@ -25,11 +25,15 @@ def to_openai_data(text,finished=False):
   return f'data: {content}\n\n'
 
 def extract_metadata(payload):
+  instructions = ['#enable_search', '#enable_gpt4_turbo']
+
   style = payload['model'].lower()
   style = getattr(ConversationStyle, style) if style in ConversationStyle._member_names_ else ConversationStyle.creative
   messages = payload['messages']
 
   prompt = messages[-1]
+  prompt_content = prompt['content']
+
   context = ''
   for msg in messages:
     role = 'assistant'
@@ -38,13 +42,15 @@ def extract_metadata(payload):
       role = 'user'
       type_info = 'message'
 
-    context += f'[{role}][#{type_info}]\n{msg["content"]}\n'
-
-  prompt_content = prompt['content']
+    content = msg['content']
+    for instruction in instructions:
+      content = content.replace(instruction, '')
+      context += f'[{role}][#{type_info}]\n{content}\n'
 
   return {
-    'prompt': prompt_content,
+    'prompt': prompt['content'],
     'context': context,
     'style': style,
-    'search': '#no_search' not in prompt_content,
+    'search': '#enable_search' in prompt_content,
+    'mode': 'gpt4-turbo' if ('#enable_gpt4_turbo' in prompt_content) else None,
   }
