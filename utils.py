@@ -1,7 +1,7 @@
 import time,json,random,string
 from EdgeGPT.EdgeGPT import ConversationStyle
 
-def to_openai_data(text,finished=False):
+def to_openai_data(text: str,finished: bool=False):
   id = ''.join(random.choices(string.ascii_letters + string.digits, k=28)) 
   obj = {
     "id": id,
@@ -24,7 +24,7 @@ def to_openai_data(text,finished=False):
   content = json.dumps(obj, separators=(',', ':'))
   return f'data: {content}\n\n'
 
-def extract_metadata(payload):
+def extract_metadata(payload: dict):
   instructions = ['#enable_search', '#enable_gpt4_turbo']
 
   style = payload['model'].lower()
@@ -54,3 +54,6 @@ def extract_metadata(payload):
     'search': '#enable_search' in prompt_content,
     'mode': 'gpt4-turbo' if ('#enable_gpt4_turbo' in prompt_content) else None,
   }
+
+def is_blank(s: str):
+  return not bool(s and not s.isspace())

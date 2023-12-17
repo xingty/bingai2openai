@@ -1,10 +1,9 @@
 # from flask import Flask,stream_with_context,Response
-from quart import Quart,abort, make_response,stream_with_context,request
+from quart import Quart,abort, make_response,request
 from EdgeGPT.EdgeGPT import Chatbot
-from EdgeGPT.EdgeGPT import ConversationStyle
 from os import getenv
-import json,time,random,string
-from utils import to_openai_data,extract_metadata
+from utils import to_openai_data,extract_metadata,is_blank
+import json,os
 
 app = Quart(__name__)
 
@@ -18,23 +17,35 @@ headers = {
 }
 
 def get_cookies():
-   with open(getenv("EDGE_COOKIES"), encoding="utf-8") as f:
-      return json.load(f)
+  script_dir = os.path.dirname(os.path.realpath(__file__))
+  cookies_file_path = os.path.join(script_dir, 'cookies.json')
+
+  with open(cookies_file_path, encoding="utf-8") as f:
+    return json.load(f)
 
 @app.route('/v1/chat/completions', methods=['POST'])
 async def completions():
-    print(getenv("EDGE_COOKIES"))
-    cookies = get_cookies()
-    bot = await Chatbot.create(
+    data = await request.get_json()
+    metadata = extract_metadata(data)
+    print(metadata)
+    if is_blank(metadata['prompt']):
+      return {'code': 500, 'message': 'messsage cannot be empty'},500
+
+    try:
+      cookies = get_cookies()
+      bot = await Chatbot.create(
         proxy='http://127.0.0.1:7890',
         cookies=cookies
-    )
+      )
+    except FileNotFoundError:
+      return {'code': 500, 'message': 'No cookies file found'},500
+    except Exception as e:
+      return {'code': 500, 'message': str(e)},500
 
     offset = 0
     suggestions = []
     search_result = []
     search_keyword = ''
-    data = await request.get_json()
 
     def parse_search_result(message):
         if 'Web search returned no relevant result' in message['hiddenText']:
@@ -75,8 +86,6 @@ async def completions():
       nonlocal search_keyword
       nonlocal suggestions
       
-      metadata = extract_metadata(data)
-      print(metadata)
       search = metadata['search']
 
       try:
@@ -131,22 +140,6 @@ async def completions():
     )
     response.timeout = None
     return response    
-
-@app.route('/v1/chat/completions2', methods=['POST'])
-async def test2():
-  data = await request.get_json()
-  metadata = extract_metadata(data)
-  print(metadata)
-  # return 'hello world'
-  @stream_with_context
-  async def streaming():
-    test_data = ['hello,','world!','how are you?','i am fine','nice to meet you']
-    for item in test_data:
-      content = to_openai_data(text=item, finished=(item == 'nice to meet you'))
-      time.sleep(0.5)
-      yield content
-
-  return streaming(), 200, headers
 
 
 app.run()
