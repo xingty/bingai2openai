@@ -212,4 +212,5 @@ ENV/
 /site
 
 config.json
+cookies.json
 logs/*
