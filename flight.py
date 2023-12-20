@@ -5,7 +5,15 @@ from os import getenv
 from utils import to_openai_data,extract_metadata,is_blank
 import json,os
 
-app = Quart(__name__)
+def load_json(filename):
+  script_dir = os.path.dirname(os.path.realpath(__file__))
+  cookies_file_path = os.path.join(script_dir, filename)
+
+  if not os.path.exists(cookies_file_path):
+     return None
+
+  with open(cookies_file_path, encoding="utf-8") as f:
+    return json.load(f)
 
 headers = {
   'Content-Type': 'text/event-stream',
@@ -16,12 +24,8 @@ headers = {
   "Access-Control-Allow-Headers": "*",
 }
 
-def get_cookies():
-  script_dir = os.path.dirname(os.path.realpath(__file__))
-  cookies_file_path = os.path.join(script_dir, 'cookies.json')
-
-  with open(cookies_file_path, encoding="utf-8") as f:
-    return json.load(f)
+app = Quart(__name__)
+env = load_json("env.json") or {}
 
 @app.route('/v1/chat/completions', methods=['POST'])
 async def completions():
@@ -32,10 +36,10 @@ async def completions():
       return {'code': 500, 'message': 'messsage cannot be empty'},500
 
     try:
-      cookies = get_cookies()
+      cookies = load_json("cookies.json")
       bot = await Chatbot.create(
-        proxy='http://127.0.0.1:7890',
-        cookies=cookies
+        cookies=cookies,
+        proxy=env.get('proxy')
       )
     except FileNotFoundError:
       return {'code': 500, 'message': 'No cookies file found'},500
