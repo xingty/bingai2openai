@@ -133,6 +133,7 @@ async def completions():
           index += 1
 
       yield to_openai_data('',True)
+      await bot.close()
 
     response = await make_response(
         send_events(),
@@ -144,6 +145,21 @@ async def completions():
     )
     response.timeout = None
     return response    
+
+@app.route('/v1/modles', methods=['GET'])
+async def models():
+  return {
+    "object": "list",
+    "data": [
+      {
+        "id": "gpt-4",
+        "object": "model",
+        "created": 1686935002,
+        "owned_by": "organization-owner"
+      }
+    ],
+    "object": "list"
+  }
 
 
 app.run()
