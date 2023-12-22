@@ -1,9 +1,10 @@
 # from flask import Flask,stream_with_context,Response
 from quart import Quart,abort, make_response,request
 from EdgeGPT.EdgeGPT import Chatbot
-from os import getenv
 from utils import to_openai_data,extract_metadata,is_blank
-import json,os
+import json,os,asyncio
+from hypercorn.config import Config
+from hypercorn.asyncio import serve
 
 def load_json(filename):
   script_dir = os.path.dirname(os.path.realpath(__file__))
@@ -156,10 +157,29 @@ async def models():
         "object": "model",
         "created": 1686935002,
         "owned_by": "organization-owner"
+      },
+      {
+        "id": "creative",
+        "object": "model",
+        "created": 1686935002,
+        "owned_by": "organization-owner"
+      },
+      {
+        "id": "precise",
+        "object": "model",
+        "created": 1686935002,
+        "owned_by": "organization-owner"
+      },
+      {
+        "id": "balanced",
+        "object": "model",
+        "created": 1686935002,
+        "owned_by": "organization-owner"
       }
     ],
     "object": "list"
   }
 
-
-app.run()
+config = Config()
+config.bind = '127.0.0.1:5000'
+asyncio.run(serve(app, config))
