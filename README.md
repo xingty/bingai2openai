@@ -53,7 +53,7 @@ This insctuction will enable gpt4-turbo for Bing.
 - Clone https://github.com/ChatGPTNextWeb/ChatGPT-Next-Web
 - Config '.env'
 
-  - Create a file '.'
+  - Create a file '.env'
 
   - Pase following content to the file '.env'
 
