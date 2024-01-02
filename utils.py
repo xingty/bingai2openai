@@ -34,6 +34,11 @@ def extract_metadata(payload: dict):
   prompt = messages[-1]
   prompt_content = prompt['content']
 
+  def remove_instructions(content: str):
+    for instruction in instructions:
+      content = content.replace(instruction, '')
+    return content
+
   context = ''
   for msg in messages:
     role = 'assistant'
@@ -42,13 +47,11 @@ def extract_metadata(payload: dict):
       role = 'user'
       type_info = 'message'
 
-    content = msg['content']
-    for instruction in instructions:
-      content = content.replace(instruction, '')
-      context += f'[{role}][#{type_info}]\n{content}\n'
+    content = remove_instructions(msg['content'])
+    context += f'[{role}][#{type_info}]\n{content}\n'
 
   return {
-    'prompt': prompt['content'],
+    'prompt': remove_instructions(prompt_content),
     'context': context,
     'style': style,
     'search': '#enable_search' in prompt_content,
