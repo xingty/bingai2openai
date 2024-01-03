@@ -171,6 +171,18 @@ async def models():
         "owned_by": "organization-owner"
       },
       {
+        "id": "creative_turbo",
+        "object": "model",
+        "created": 1686935002,
+        "owned_by": "organization-owner"
+      },
+      {
+        "id": "precise_turbo",
+        "object": "model",
+        "created": 1686935002,
+        "owned_by": "organization-owner"
+      },
+      {
         "id": "balanced",
         "object": "model",
         "created": 1686935002,
@@ -181,5 +193,5 @@ async def models():
   }
 
 config = Config()
-config.bind = '127.0.0.1:5000'
+config.bind = f"{env.get('bind', '127.0.0.1')}:{env.get('port', 5000)}"
 asyncio.run(serve(app, config))

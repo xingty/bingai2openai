@@ -27,7 +27,13 @@ def to_openai_data(text: str,finished: bool=False):
 def extract_metadata(payload: dict):
   instructions = ['#enable_search', '#enable_gpt4_turbo']
 
-  style = payload['model'].lower()
+  # style = payload['model'].lower()
+  segments = payload['model'].lower().split('_')
+  style = segments[0]
+  # is gpt4-turbo enabled
+  enable_turbo = False
+  if len(segments) > 1:
+    enable_turbo = segments[1] == 'turbo'
   style = getattr(ConversationStyle, style) if style in ConversationStyle._member_names_ else ConversationStyle.creative
   messages = payload['messages']
 
@@ -50,12 +56,16 @@ def extract_metadata(payload: dict):
     content = remove_instructions(msg['content'])
     context += f'[{role}][#{type_info}]\n{content}\n'
 
+  model = None
+  if enable_turbo or '#enable_gpt4_turbo' in prompt_content:
+    model = 'gpt4-turbo'
+
   return {
     'prompt': remove_instructions(prompt_content),
     'context': context,
     'style': style,
     'search': '#enable_search' in prompt_content,
-    'mode': 'gpt4-turbo' if ('#enable_gpt4_turbo' in prompt_content) else None,
+    'mode': model
   }
 
 def is_blank(s: str):
