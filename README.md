@@ -45,11 +45,13 @@ This insctuction will enable gpt4-turbo for Bing.
 ## Environment
 ```json
 {
-  "proxy": "the address of your proxy server(http or socks5)"
+  "proxy": "the address of your proxy server(http or socks5)",
+  "bind": "bind ip address",
+  "port": 5000
 }
 ```
 
-## Using with ChatGPT Next Web
+## Using with NextChat
 - Clone https://github.com/ChatGPTNextWeb/ChatGPT-Next-Web
 - Config '.env'
 
@@ -83,7 +85,7 @@ This insctuction will enable gpt4-turbo for Bing.
 
 ```json
 {
-  "model": "creative|precise|balanced",
+  "model": "creative|precise|balanced|creative_turbo|precise_turbo",
   "messages": [
     {
       "role": "system",
@@ -147,6 +149,18 @@ This insctuction will enable gpt4-turbo for Bing.
       "created": 1686935002,
       "owned_by": "organization-owner"
     },
+    {
+      "id": "creative_turbo",
+      "object": "model",
+      "created": 1686935002,
+      "owned_by": "organization-owner"
+    },
+    {
+      "id": "precise_turbo",
+      "object": "model",
+      "created": 1686935002,
+      "owned_by": "organization-owner"
+    },    
     {
       "id": "balanced",
       "object": "model",
