@@ -47,7 +47,8 @@ This insctuction will enable gpt4-turbo for Bing.
 {
   "proxy": "the address of your proxy server(http or socks5)",
   "bind": "bind ip address",
-  "port": 5000
+  "port": 5000,
+  "api_key": "api key"
 }
 ```
 
