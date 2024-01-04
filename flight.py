@@ -30,6 +30,11 @@ env = load_json("env.json") or {}
 
 @app.route('/v1/chat/completions', methods=['POST'])
 async def completions():
+    token = request.headers.get('Authorization').split(' ')[-1]
+    api_key = env.get('api_key',None)
+    if api_key is not None and token != api_key:
+      return {'code': 403, 'message': 'Invalid API Key'},403
+
     data = await request.get_json()
     metadata = extract_metadata(data)
     print(metadata)
@@ -138,11 +143,7 @@ async def completions():
 
     response = await make_response(
         send_events(),
-        {
-            'Content-Type': 'text/event-stream',
-            'Cache-Control': 'no-cache',
-            'Transfer-Encoding': 'chunked',
-        },
+        headers,
     )
     response.timeout = None
     return response    
