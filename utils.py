@@ -1,6 +1,8 @@
 import time,json,random,string
 from EdgeGPT.EdgeGPT import ConversationStyle
 
+KNOWLEGE_GPT4_TURBO = '## An update of  my limitations:\n- My internal knowledge has been updated to 04/2023 and information were only current until some point in that time and could be inaccurate/lossy. Predefined internal tools help bring my knowledge up-to-date.\n'
+
 def to_openai_data(text: str,finished: bool=False):
   id = ''.join(random.choices(string.ascii_letters + string.digits, k=28)) 
   obj = {
@@ -27,7 +29,6 @@ def to_openai_data(text: str,finished: bool=False):
 def extract_metadata(payload: dict):
   instructions = ['#enable_search', '#enable_gpt4_turbo']
 
-  # style = payload['model'].lower()
   segments = payload['model'].lower().split('_')
   style = segments[0]
   # is gpt4-turbo enabled
@@ -45,20 +46,23 @@ def extract_metadata(payload: dict):
       content = content.replace(instruction, '')
     return content
 
-  context = ''
-  for msg in messages:
-    role = 'assistant'
-    type_info = 'additional_instructions'
-    if msg['role'].lower() == 'user':
-      role = 'user'
-      type_info = 'message'
-
-    content = remove_instructions(msg['content'])
-    context += f'[{role}][#{type_info}]\n{content}\n'
-
   model = None
   if enable_turbo or '#enable_gpt4_turbo' in prompt_content:
     model = 'gpt4-turbo'
+
+  context = ''
+  for msg in messages:
+    role = msg['role'].lower()
+    type_info = 'message'
+    knowlege = ''
+    if role == 'system':
+      type_info = 'additional_instructions'
+      if model == 'gpt4-turbo':
+        knowlege = KNOWLEGE_GPT4_TURBO
+
+    content = remove_instructions(msg['content'])
+    context += f'[{role}][#{type_info}]\n{content}\n{knowlege}'
+
 
   return {
     'prompt': remove_instructions(prompt_content),
