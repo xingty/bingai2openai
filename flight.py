@@ -1,7 +1,8 @@
 # from flask import Flask,stream_with_context,Response
 from quart import Quart,abort, make_response,request
 from EdgeGPT.EdgeGPT import Chatbot
-from utils import to_openai_data,extract_metadata,is_blank
+from EdgeGPT.EdgeGPT import ConversationStyle
+from utils import to_openai_data,extract_metadata,is_blank,to_openai_title_data
 import json,os,asyncio
 from hypercorn.config import Config
 from hypercorn.asyncio import serve
@@ -56,6 +57,21 @@ async def completions():
     suggestions = []
     search_result = []
     search_keyword = ''
+
+    async def gen_title():
+      response = await bot.ask(
+        prompt=metadata['prompt'],
+        conversation_style=ConversationStyle.precise,
+        webpage_context=metadata['context'],
+        mode='gpt4-turbo',
+      )
+      if 'item' in response and 'result' in response['item']:
+        content = response['item']['result']['message']
+        print(content)
+        yield to_openai_title_data(content)
+      else:
+        yield {"code": 500, "message": "Failed to generate title"}
+          
 
     def parse_search_result(message):
         if 'Web search returned no relevant result' in message['hiddenText']:
@@ -141,11 +157,24 @@ async def completions():
       yield to_openai_data('',True)
       await bot.close()
 
-    response = await make_response(
+    accept_list = request.headers["Accept"] or []
+    response = None
+    if 'text/event-stream' not in accept_list:
+      print('++++++++++++++++++++++++++++++++++++++')
+      response = await make_response(
+        gen_title(),
+        {
+          'Content-Type': 'application/json',
+          'Cache-Control': 'no-cache',
+        },
+      )
+    else:
+      response = await make_response(
         send_events(),
         headers,
-    )
-    response.timeout = None
+      )
+      response.timeout = None
+
     return response    
 
 @app.route('/v1/modles', methods=['GET'])
