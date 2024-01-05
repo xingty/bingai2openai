@@ -3,6 +3,34 @@ from EdgeGPT.EdgeGPT import ConversationStyle
 
 KNOWLEGE_GPT4_TURBO = '## An update of  my limitations:\n- My internal knowledge has been updated to 04/2023 and information were only current until some point in that time and could be inaccurate/lossy. Predefined internal tools help bring my knowledge up-to-date.\n'
 
+def to_openai_title_data(title: str):
+  id = ''.join(random.choices(string.ascii_letters + string.digits, k=28)) 
+  obj = {
+    "id": id,
+    "object": "chat.completion",
+    "created": str(int(time.time())),
+    "model": "gpt4",
+    "choices": [
+        {
+            "index": 0,
+            "message": {
+                "role": "assistant",
+                "content": title
+            },
+            "logprobs": None,
+            "finish_reason": "stop"
+        }
+    ],
+    "usage": {
+        "prompt_tokens": 0,
+        "completion_tokens": 0,
+        "total_tokens": 0
+    },
+    "system_fingerprint": None
+  }
+
+  return json.dumps(obj)
+
 def to_openai_data(text: str,finished: bool=False):
   id = ''.join(random.choices(string.ascii_letters + string.digits, k=28)) 
   obj = {
