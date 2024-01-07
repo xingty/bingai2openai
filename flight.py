@@ -38,6 +38,7 @@ async def completions():
 
     data = await request.get_json()
     metadata = extract_metadata(data)
+    stream = data.get('stream', False)
     print(metadata)
     if is_blank(metadata['prompt']):
       return {'code': 500, 'message': 'messsage cannot be empty'},500
@@ -157,10 +158,8 @@ async def completions():
       yield to_openai_data('',True)
       await bot.close()
 
-    accept_list = request.headers["Accept"] or []
     response = None
-    if 'text/event-stream' not in accept_list:
-      print('++++++++++++++++++++++++++++++++++++++')
+    if not stream:
       response = await make_response(
         gen_title(),
         {
