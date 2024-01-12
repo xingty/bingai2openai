@@ -63,7 +63,7 @@ def extract_metadata(payload: dict):
   enable_turbo = False
   if len(segments) > 1:
     enable_turbo = segments[1] == 'turbo'
-  style = getattr(ConversationStyle, style) if style in ConversationStyle._member_names_ else ConversationStyle.creative
+  style = getattr(ConversationStyle, style) if style in ConversationStyle._member_names_ else ConversationStyle.precise
   messages = payload['messages']
 
   prompt = messages[-1]
