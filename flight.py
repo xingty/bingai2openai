@@ -57,7 +57,6 @@ async def completions():
     offset = 0
     suggestions = []
     search_result = []
-    search_keyword = ''
 
     async def gen_title():
       response = await bot.ask(
@@ -92,7 +91,7 @@ async def completions():
 
         return data
 
-    def process_message(response,message):
+    def process_message(response,message,new_line):
         nonlocal offset 
         if "cursor" in response["arguments"][0]:
             offset = 0
@@ -106,12 +105,13 @@ async def completions():
         text = message["text"]
         truncated = text[offset:]
         offset = len(text)
-        return to_openai_data(truncated)
+        return to_openai_data(f'{new_line}{truncated}')
 
     async def send_events():
       nonlocal search_result
-      nonlocal search_keyword
       nonlocal suggestions
+      search_keyword = 'Searching the web for:\n'
+      new_line = '\n'
       
       search = metadata['search']
 
@@ -134,9 +134,14 @@ async def completions():
             if msg_type == "InternalSearchResult":
               search_result = search_result + parse_search_result(message)
             elif msg_type == "InternalSearchQuery":
-              search_keyword = message['hiddenText']
+              keyword = f"- {message['hiddenText']}\n"
+              if not is_blank(search_keyword):
+                keyword = search_keyword + keyword
+                search_keyword = ''
+              yield to_openai_data(keyword)
             elif msg_type is None:
-              yield process_message(response,message)
+              yield process_message(response,message,new_line)
+              new_line = ''
             else:
               print(f'Ignoring message type: {msg_type}')
           elif type == 2 and "item" in response and "messages" in response["item"]:
