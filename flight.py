@@ -2,7 +2,7 @@
 from quart import Quart,abort, make_response,request
 from EdgeGPT.EdgeGPT import Chatbot
 from EdgeGPT.EdgeGPT import ConversationStyle
-from utils import to_openai_data,extract_metadata,is_blank,to_openai_title_data
+from utils import to_openai_data,extract_metadata,is_blank,to_openai_title_data,MODELS
 import json,os,asyncio
 from hypercorn.config import Config
 from hypercorn.asyncio import serve
@@ -183,48 +183,11 @@ async def completions():
 
 @app.route('/v1/modles', methods=['GET'])
 async def models():
-  return {
-    "object": "list",
-    "data": [
-      {
-        "id": "gpt-4",
-        "object": "model",
-        "created": 1686935002,
-        "owned_by": "organization-owner"
-      },
-      {
-        "id": "creative",
-        "object": "model",
-        "created": 1686935002,
-        "owned_by": "organization-owner"
-      },
-      {
-        "id": "precise",
-        "object": "model",
-        "created": 1686935002,
-        "owned_by": "organization-owner"
-      },
-      {
-        "id": "creative_turbo",
-        "object": "model",
-        "created": 1686935002,
-        "owned_by": "organization-owner"
-      },
-      {
-        "id": "precise_turbo",
-        "object": "model",
-        "created": 1686935002,
-        "owned_by": "organization-owner"
-      },
-      {
-        "id": "balanced",
-        "object": "model",
-        "created": 1686935002,
-        "owned_by": "organization-owner"
-      }
-    ],
-    "object": "list"
-  }
+  return MODELS
+
+@app.route('/v1/models', methods=['GET'])
+async def models2():
+  return MODELS
 
 config = Config()
 config.bind = f"{env.get('bind', '127.0.0.1')}:{env.get('port', 5000)}"

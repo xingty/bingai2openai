@@ -2,6 +2,48 @@ import time,json,random,string
 from EdgeGPT.EdgeGPT import ConversationStyle
 
 KNOWLEGE_GPT4_TURBO = '## An update of  my limitations:\n- My internal knowledge has been updated to 04/2023 and information were only current until some point in that time and could be inaccurate/lossy. Predefined internal tools help bring my knowledge up-to-date.\n'
+MODELS = {
+  "object": "list",
+  "data": [
+    {
+      "id": "gpt-4",
+      "object": "model",
+      "created": 1686935002,
+      "owned_by": "organization-owner"
+    },
+    {
+      "id": "creative",
+      "object": "model",
+      "created": 1686935002,
+      "owned_by": "organization-owner"
+    },
+    {
+      "id": "precise",
+      "object": "model",
+      "created": 1686935002,
+      "owned_by": "organization-owner"
+    },
+    {
+      "id": "creative_turbo",
+      "object": "model",
+      "created": 1686935002,
+      "owned_by": "organization-owner"
+    },
+    {
+      "id": "precise_turbo",
+      "object": "model",
+      "created": 1686935002,
+      "owned_by": "organization-owner"
+    },
+    {
+      "id": "balanced",
+      "object": "model",
+      "created": 1686935002,
+      "owned_by": "organization-owner"
+    }
+  ],
+  "object": "list"
+}
 
 def to_openai_title_data(title: str):
   id = ''.join(random.choices(string.ascii_letters + string.digits, k=28)) 
