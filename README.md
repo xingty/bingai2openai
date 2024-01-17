@@ -52,7 +52,36 @@ This insctuction will enable gpt4-turbo for Bing.
 }
 ```
 
+* proxy
+
+  If set, the service will run behind the proxy server
+
+* api_key
+
+  If set, you must use the same key in your HTTP request when call the completions api, for example:
+
+  ```shell
+  curl --location 'http://127.0.0.1:5000/v1/chat/completions' \
+  --header 'Accept: application/json,text/event-stream' \
+  --header 'Content-Type: application/json' \
+  --header 'Accept-Language: en-US,en;q=0.9' \
+  --header 'Accept-Encoding: gzip, deflate' \
+  --header 'Connection: keep-alive' \
+  --header 'Authorization: bearer my_api_keys' \
+  --data '{
+      "messages": ......,
+      "model": "precise_turbo",
+      "temperature": 0.5,
+      "presence_penalty": 0,
+      "frequency_penalty": 0,
+      "top_p": 1
+  }'
+  ```
+
+  The way the service verifies the API Key is also the same as OpenAI's method.
+
 ## Using with NextChat
+
 - Clone https://github.com/ChatGPTNextWeb/ChatGPT-Next-Web
 - Config '.env'
 
@@ -124,7 +153,7 @@ This insctuction will enable gpt4-turbo for Bing.
 
 
 
-**[GET]** `/v1/modles`
+**[GET]** `/v1/models`
 
 `Response:`
 
