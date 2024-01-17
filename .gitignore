@@ -215,3 +215,4 @@ config.json
 cookies.json
 logs/*
 env.json
+test/*
