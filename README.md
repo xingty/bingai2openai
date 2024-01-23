@@ -48,7 +48,8 @@ This insctuction will enable gpt4-turbo for Bing.
   "proxy": "the address of your proxy server(http or socks5)",
   "bind": "bind ip address",
   "port": 5000,
-  "api_key": "api key"
+  "api_key": "api key",
+  "search": false
 }
 ```
 
@@ -79,6 +80,10 @@ This insctuction will enable gpt4-turbo for Bing.
   ```
 
   The way the service verifies the API Key is also the same as OpenAI's method.
+  
+* search
+
+  True will enable the search feature for Bing and vice versa
 
 ## Using with NextChat
 

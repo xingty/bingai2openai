@@ -39,7 +39,7 @@ async def completions():
     data = await request.get_json()
     metadata = extract_metadata(data)
     stream = data.get('stream', False)
-    search = metadata['search']
+    search = metadata['search'] or env.get('search', False)
     print(metadata)
     if is_blank(metadata['prompt']):
       return {'code': 500, 'message': 'messsage cannot be empty'},500
