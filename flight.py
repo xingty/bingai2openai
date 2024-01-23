@@ -39,6 +39,7 @@ async def completions():
     data = await request.get_json()
     metadata = extract_metadata(data)
     stream = data.get('stream', False)
+    search = metadata['search']
     print(metadata)
     if is_blank(metadata['prompt']):
       return {'code': 500, 'message': 'messsage cannot be empty'},500
@@ -61,16 +62,18 @@ async def completions():
     async def gen_title():
       response = await bot.ask(
         prompt=metadata['prompt'],
-        conversation_style=ConversationStyle.precise,
+        conversation_style=metadata['style'],
         webpage_context=metadata['context'],
-        mode='gpt4-turbo',
+        no_search=(not search),
+        search_result=search,
+        mode=metadata['mode'],
       )
       if 'item' in response and 'result' in response['item']:
         content = response['item']['result']['message']
-        print(content)
+
         yield to_openai_title_data(content)
       else:
-        yield {"code": 500, "message": "Failed to generate title"}
+        yield {"code": 500, "message": "Failed to fetch response"}
           
 
     def parse_search_result(message):
@@ -112,8 +115,6 @@ async def completions():
       nonlocal suggestions
       search_keyword = 'Searching the web for:\n'
       new_line = '\n'
-      
-      search = metadata['search']
 
       try:
          async for final,response in bot.ask_stream (
