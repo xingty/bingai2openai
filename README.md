@@ -96,6 +96,7 @@ This insctuction will enable gpt4-turbo for Bing.
 
     ```shell
     BASE_URL=http://127.0.0.1:5000
+    CUSTOM_MODELS=precise,creative,precise_turbo
     ```
 - Run ChatGPT Next Web
 
