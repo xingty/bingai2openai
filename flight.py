@@ -1,8 +1,8 @@
 # from flask import Flask,stream_with_context,Response
-from quart import Quart,abort, make_response,request
+from quart import Quart, make_response,request
 from EdgeGPT.EdgeGPT import Chatbot
-from EdgeGPT.EdgeGPT import ConversationStyle
-from utils import to_openai_data,extract_metadata,is_blank,to_openai_title_data,MODELS
+from utils import to_openai_data,extract_metadata,to_openai_title_data
+from utils import is_blank,MODELS,digest,hash_compare
 import json,os,asyncio
 from hypercorn.config import Config
 from hypercorn.asyncio import serve
@@ -28,12 +28,14 @@ headers = {
 
 app = Quart(__name__)
 env = load_json("env.json") or {}
+api_key = env.get('api_key',None)
+if api_key is not None:
+  api_key = digest(api_key)
 
 @app.route('/v1/chat/completions', methods=['POST'])
 async def completions():
     token = request.headers.get('Authorization').split(' ')[-1]
-    api_key = env.get('api_key',None)
-    if api_key is not None and token != api_key:
+    if api_key is not None and (not hash_compare(api_key, digest(token))):
       return {'code': 403, 'message': 'Invalid API Key'},403
 
     data = await request.get_json()

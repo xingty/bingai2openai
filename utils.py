@@ -1,7 +1,8 @@
 import time,json,random,string
+import hashlib,hmac
 from EdgeGPT.EdgeGPT import ConversationStyle
 
-KNOWLEGE_GPT4_TURBO = '## An update of  my limitations:\n- My internal knowledge has been updated to 04/2023 and information were only current until some point in that time and could be inaccurate/lossy. Predefined internal tools help bring my knowledge up-to-date.\n'
+# KNOWLEGE_GPT4_TURBO = '## An update of  my limitations:\n- My internal knowledge has been updated to 04/2023 and information were only current until some point in that time and could be inaccurate/lossy. Predefined internal tools help bring my knowledge up-to-date.\n'
 MODELS = {
   "object": "list",
   "data": [
@@ -124,14 +125,14 @@ def extract_metadata(payload: dict):
   for msg in messages:
     role = msg['role'].lower()
     type_info = 'message'
-    knowlege = ''
+    # knowlege = ''
     if role == 'system':
       type_info = 'additional_instructions'
-      if model == 'gpt4-turbo':
-        knowlege = KNOWLEGE_GPT4_TURBO
+      # if model == 'gpt4-turbo':
+        # knowlege = KNOWLEGE_GPT4_TURBO
 
     content = remove_instructions(msg['content'])
-    context += f'[{role}][#{type_info}]\n{content}\n{knowlege}'
+    context += f'[{role}][#{type_info}]\n{content}'
 
 
   return {
@@ -144,3 +145,9 @@ def extract_metadata(payload: dict):
 
 def is_blank(s: str):
   return not bool(s and not s.isspace())
+
+def digest(s: str):
+  return hashlib.sha1(s.encode()).digest()
+
+def hash_compare(src: bytes, target: bytes):
+  return hmac.compare_digest(src, target)
