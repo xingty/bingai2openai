@@ -61,6 +61,7 @@ async def completions():
     offset = 0
     suggestions = []
     search_result = []
+    locale=env.get('locale','en-US')
 
     async def gen_title():
       response = await bot.ask(
@@ -70,6 +71,7 @@ async def completions():
         no_search=(not search),
         search_result=search,
         mode=metadata['mode'],
+        locale=locale,
       )
       if 'item' in response and 'result' in response['item']:
         content = response['item']['result']['message']
@@ -128,7 +130,7 @@ async def completions():
             webpage_context=metadata['context'],
             no_search=(not search),
             mode=metadata['mode'],
-            locale=env.get('locale','en-US'),
+            locale=locale,
           ):
 
           type = response["type"]
