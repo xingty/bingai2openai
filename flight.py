@@ -6,6 +6,7 @@ from utils import is_blank,MODELS,digest,hash_compare
 import json,os,asyncio
 from hypercorn.config import Config
 from hypercorn.asyncio import serve
+from EdgeGPT.utilities import get_location_hint_from_locale
 
 def load_json(filename):
   script_dir = os.path.dirname(os.path.realpath(__file__))
@@ -127,6 +128,7 @@ async def completions():
             webpage_context=metadata['context'],
             no_search=(not search),
             mode=metadata['mode'],
+            locale=env.get('locale','en-US'),
           ):
 
           type = response["type"]
