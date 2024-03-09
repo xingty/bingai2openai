@@ -127,7 +127,7 @@ def extract_metadata(payload: dict):
     type_info = 'message'
     # knowlege = ''
     if role == 'system':
-      type_info = 'additional_instructions'
+      type_info = 'instructions'
       # if model == 'gpt4-turbo':
         # knowlege = KNOWLEGE_GPT4_TURBO
 
