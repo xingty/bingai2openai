@@ -33,8 +33,14 @@ api_key = env.get('api_key',None)
 if api_key is not None:
   api_key = digest(api_key)
 
-@app.route('/v1/chat/completions', methods=['POST'])
+@app.route('/v1/chat/completions', methods=['POST', 'OPTIONS'])
 async def completions():
+    if request.method == 'OPTIONS':
+      return await make_response('', 200, {
+        'Access-Control-Allow-Origin': "*",
+        "Access-Control-Allow-Methods": "*",
+        "Access-Control-Allow-Headers": "*",
+      })
     token = request.headers.get('Authorization').split(' ')[-1]
     if api_key is not None and (not hash_compare(api_key, digest(token))):
       return {'code': 403, 'message': 'Invalid API Key'},403

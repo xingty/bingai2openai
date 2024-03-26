@@ -52,7 +52,7 @@ def to_openai_title_data(title: str):
     "id": id,
     "object": "chat.completion",
     "created": str(int(time.time())),
-    "model": "gpt4",
+    "model": "gpt-4",
     "choices": [
         {
             "index": 0,
