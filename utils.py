@@ -122,18 +122,15 @@ def extract_metadata(payload: dict):
     model = 'gpt4-turbo'
 
   context = ''
-  for msg in messages:
+  for i in range(len(messages) - 1):
+    msg = messages[i]
     role = msg['role'].lower()
     type_info = 'message'
-    # knowlege = ''
     if role == 'system':
       type_info = 'instructions'
-      # if model == 'gpt4-turbo':
-        # knowlege = KNOWLEGE_GPT4_TURBO
 
     content = remove_instructions(msg['content'])
     context += f'[{role}][#{type_info}]\n{content}'
-
 
   return {
     'prompt': remove_instructions(prompt_content),
