@@ -1,6 +1,6 @@
 # from flask import Flask,stream_with_context,Response
 from quart import Quart, make_response,request
-from EdgeGPT.EdgeGPT import Chatbot
+from EdgeGPT.EdgeGPT import Chatbot,ConversationStyle
 from utils import to_openai_data,extract_metadata,to_openai_title_data
 from utils import is_blank,MODELS,digest,hash_compare
 import json,os,asyncio
@@ -49,7 +49,7 @@ async def completions():
     metadata = extract_metadata(data)
     stream = data.get('stream', False)
     search = metadata['search'] or env.get('search', False)
-    print(metadata)
+    # print(metadata)
     if is_blank(metadata['prompt']):
       return {'code': 500, 'message': 'messsage cannot be empty'},500
 
@@ -65,9 +65,8 @@ async def completions():
       return {'code': 500, 'message': str(e)},500
 
     offset = 0
-    suggestions = []
-    search_result = []
     locale=env.get('locale','en-US')
+    print(metadata['prompt'])
 
     async def gen_title():
       response = await bot.ask(
@@ -76,7 +75,6 @@ async def completions():
         webpage_context=metadata['context'],
         no_search=(not search),
         search_result=search,
-        mode=metadata['mode'],
         locale=locale,
       )
       if 'item' in response and 'result' in response['item']:
@@ -85,95 +83,34 @@ async def completions():
         yield to_openai_title_data(content)
       else:
         yield {"code": 500, "message": "Failed to fetch response"}
-          
-
-    def parse_search_result(message):
-        if 'Web search returned no relevant result' in message['hiddenText']:
-            return [{
-                'title': 'No relevant result',
-                'url': None,
-                'snippet': message['hiddenText']
-            }]
-        
-        data = []
-        for group in json.loads(message['text']).values():
-            for item in group:
-                data.append({
-                    'title': item['title'],
-                    'url': item['url'],
-                })
-
-        return data
-
-    def process_message(response,message,new_line):
-        nonlocal offset 
-        if "cursor" in response["arguments"][0]:
-            offset = 0
-
-        if message.get("contentOrigin") == "Apology":
-            print('message has been revoked')
-            print(message)
-            text = f"{message.get('text')} -end- (message has been revoked)"
-            return to_openai_data(text)
-        
-        text = message["text"]
-        truncated = text[offset:]
-        offset = len(text)
-        return to_openai_data(f'{new_line}{truncated}')
 
     async def send_events():
-      nonlocal search_result
-      nonlocal suggestions
-      search_keyword = 'Searching the web for:\n'
-      new_line = '\n'
+      offset = 0
 
       try:
          async for final,response in bot.ask_stream (
             prompt=metadata['prompt'],
             conversation_style=metadata['style'],
-            search_result=search,
-            raw=True,
+            search_result=True,
+            raw=False,
             webpage_context=metadata['context'],
             no_search=(not search),
-            mode=metadata['mode'],
-            locale=locale,
           ):
-
-          type = response["type"]
-          if type == 1 and "messages" in response["arguments"][0]:
-            message = response["arguments"][0]["messages"][0]
-            msg_type = message.get("messageType")
-            
-            if msg_type == "InternalSearchResult":
-              search_result = search_result + parse_search_result(message)
-            elif msg_type == "InternalSearchQuery":
-              keyword = f"- {message['hiddenText']}\n"
-              if not is_blank(search_keyword):
-                keyword = search_keyword + keyword
-                search_keyword = ''
-              yield to_openai_data(keyword)
-            elif msg_type is None:
-              yield process_message(response,message,new_line)
-              new_line = ''
+            text = None
+            if isinstance(response, dict):
+              text = response["item"]["messages"][-1].get("text")
             else:
-              print(f'Ignoring message type: {msg_type}')
-          elif type == 2 and "item" in response and "messages" in response["item"]:
-              message = response["item"]["messages"][-1]
-              if "suggestedResponses" in message:
-                suggestions = list(map(lambda x: x["text"], message["suggestedResponses"]))
+              text = response
+
+            truncated = text[offset:]
+            offset = len(text)
+
+            yield to_openai_data(truncated,final)
       except Exception as e:
          print(e)
          yield to_openai_data(str(e),True)
          return
 
-      yield to_openai_data('\n\n')
-      if len(search_result) > 0:
-        index = 1
-        for item in search_result:
-          yield to_openai_data(f'- [^{index}^] [{item["title"]}]({item["url"]})\n', False)
-          index += 1
-
-      yield to_openai_data('',True)
       await bot.close()
 
     response = None
@@ -193,6 +130,7 @@ async def completions():
       response.timeout = None
 
     return response    
+
 
 @app.route('/v1/modles', methods=['GET'])
 async def models():
