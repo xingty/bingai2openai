@@ -1,6 +1,6 @@
 # from flask import Flask,stream_with_context,Response
 from quart import Quart, make_response, request
-from EdgeGPT.EdgeGPT import Chatbot, ConversationStyle
+from EdgeGPT.EdgeGPT import Chatbot
 from utils import to_openai_data, extract_metadata, to_openai_title_data
 from utils import is_blank, MODELS, digest, hash_compare
 import json, os, asyncio
